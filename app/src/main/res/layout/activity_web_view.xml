@@ -1,0 +1,67 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.changhc.es_final.WebViewActivity">
+
+    <!-- The primary full-screen view. This can be replaced with whatever view
+         is needed to present your content, e.g. VideoView, SurfaceView,
+         TextureView, etc. -->
+
+    <WebView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/webView">
+    </WebView>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:layout_marginBottom="5dp"
+        android:id="@+id/buttons">
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:minWidth="50sp"
+            android:text="UP"
+            android:textSize="20sp"
+            android:background="@drawable/button_border"
+            android:layout_margin="10sp"
+            android:paddingTop="5sp"
+            android:paddingBottom="5sp"
+            android:layout_weight="1"
+            android:textAlignment="center"
+            android:onClick="rotate" />
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:minWidth="50sp"
+            android:text="DOWN"
+            android:textSize="20sp"
+            android:background="@drawable/button_border"
+            android:layout_margin="10sp"
+            android:paddingTop="5sp"
+            android:paddingBottom="5sp"
+            android:layout_weight="1"
+            android:textAlignment="center"
+            android:onClick="rotate" />
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:minWidth="50sp"
+            android:text="CAPTURE"
+            android:textSize="20sp"
+            android:background="@drawable/button_border"
+            android:layout_margin="10sp"
+            android:paddingTop="5sp"
+            android:paddingBottom="5sp"
+            android:layout_weight="1"
+            android:textAlignment="center"
+            android:onClick="captureImage"/>
+    </LinearLayout>
+
+    <!-- This FrameLayout insets its children based on system windows using
+         android:fitsSystemWindows. -->
+
+
+</FrameLayout>
