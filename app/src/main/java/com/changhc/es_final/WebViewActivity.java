@@ -156,7 +156,7 @@ public class WebViewActivity extends AppCompatActivity {
         queue.add(req);
     }
 
-    public void captureImage() {
+    public void captureImage(View v) {
         String url = String.format("http://%s:%s/api/capture", mIpAddr, mPort);
         JSONObject jsonBody = new JSONObject();
         try {
@@ -296,7 +296,7 @@ public class WebViewActivity extends AppCompatActivity {
                 // Toast.makeText(webViewActivity.getApplicationContext(), String.format("%f, %f", location.getLongitude(), location.getLatitude()), Toast.LENGTH_SHORT).show();
                 longitude = location.getLongitude();
                 latitude = location.getLatitude();
-                captureImage();
+                //captureImage();
             } else {
                 Toast.makeText(webViewActivity.getApplicationContext(), "Location is null. Please try again.", Toast.LENGTH_SHORT).show();
             }
