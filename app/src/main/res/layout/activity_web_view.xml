@@ -57,7 +57,7 @@
             android:paddingBottom="5sp"
             android:layout_weight="1"
             android:textAlignment="center"
-            android:onClick="captureImage"/>
+            android:onClick="getCurrentLocation"/>
     </LinearLayout>
 
     <!-- This FrameLayout insets its children based on system windows using

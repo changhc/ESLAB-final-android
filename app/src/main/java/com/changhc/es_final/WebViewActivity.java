@@ -7,6 +7,10 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Picture;
+import android.location.Criteria;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.Environment;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -40,6 +44,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
+import java.util.logging.Logger;
 
 
 /**
@@ -51,6 +56,15 @@ public class WebViewActivity extends AppCompatActivity {
     static public String mIpAddr, mPort;
     private WebView mWebView;
     static public RequestQueue queue;
+
+    private LocationManager locationMgr;
+    private double longitude = 0;
+    private double latitude = 0;
+    public static final int LOCATION_UPDATE_MIN_DISTANCE = 10;
+    public static final int LOCATION_UPDATE_MIN_TIME = 5000;
+
+    private WebViewActivity webViewActivity;
+    String bestProvider;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,6 +79,12 @@ public class WebViewActivity extends AppCompatActivity {
         startService(intentForService);
         mWebView.getSettings().setLoadWithOverviewMode(true);
         mWebView.getSettings().setUseWideViewPort(true);
+
+        this.locationMgr = (LocationManager) this.getSystemService(LOCATION_SERVICE);
+        Criteria criteria = new Criteria();  //資訊提供者選取標準
+        bestProvider = locationMgr.getBestProvider(criteria, true);    //選擇精準度最高的提供者
+
+        webViewActivity = this;
     }
 
     @Override
@@ -90,7 +110,7 @@ public class WebViewActivity extends AppCompatActivity {
         JSONObject jsonBody = new JSONObject();
         try {
             Button button = (Button) v;
-            String direction = button.getText().toString().equals("UP") ? "1" : "-1";
+            String direction = button.getText().toString().equals("UP") ? "1" : "0";
             jsonBody.put("command", direction);
         } catch (Exception e) {
             Log.e("WebView", e.getMessage());
@@ -136,11 +156,13 @@ public class WebViewActivity extends AppCompatActivity {
         queue.add(req);
     }
 
-    public void captureImage(View v) {
+    public void captureImage() {
         String url = String.format("http://%s:%s/api/capture", mIpAddr, mPort);
         JSONObject jsonBody = new JSONObject();
         try {
             jsonBody.put("command", "1");
+            jsonBody.put("lng", String.valueOf(longitude));
+            jsonBody.put("lat", String.valueOf(latitude));
         } catch (Exception e) {
             Log.e("WebView", e.getMessage());
         }
@@ -245,5 +267,52 @@ public class WebViewActivity extends AppCompatActivity {
         req.setRetryPolicy(new DefaultRetryPolicy( 50000, 5, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
         queue.add(req);
     }
+
+    public void getCurrentLocation(View v) {
+        boolean isGPSEnabled = locationMgr.isProviderEnabled(LocationManager.GPS_PROVIDER);
+
+        Location location = null;
+        if (isGPSEnabled) {
+            if (ContextCompat.checkSelfPermission( v.getRootView().getContext(), android.Manifest.permission.ACCESS_FINE_LOCATION ) != PackageManager.PERMISSION_GRANTED &&
+                    ContextCompat.checkSelfPermission( v.getRootView().getContext(), android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(webViewActivity,
+                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 0);
+                ActivityCompat.requestPermissions(webViewActivity,
+                        new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, 0);
+                return;
+            }
+            locationMgr.requestLocationUpdates(LocationManager.GPS_PROVIDER,
+                    LOCATION_UPDATE_MIN_TIME, LOCATION_UPDATE_MIN_DISTANCE, mLocationListener);
+            location = locationMgr.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+        }
+        if (location != null);
+            //Toast.makeText(v.getRootView().getContext(), String.format("%f, %f", location.getLongitude(), location.getLatitude()), Toast.LENGTH_SHORT).show();
+    }
+
+    private LocationListener mLocationListener = new LocationListener() {
+        @Override
+        public void onLocationChanged(Location location) {
+            if (location != null) {
+                // Toast.makeText(webViewActivity.getApplicationContext(), String.format("%f, %f", location.getLongitude(), location.getLatitude()), Toast.LENGTH_SHORT).show();
+                longitude = location.getLongitude();
+                latitude = location.getLatitude();
+                captureImage();
+            } else {
+                Toast.makeText(webViewActivity.getApplicationContext(), "Location is null. Please try again.", Toast.LENGTH_SHORT).show();
+            }
+        }
+
+        @Override
+        public void onStatusChanged(String s, int i, Bundle bundle) {
+        }
+
+        @Override
+        public void onProviderEnabled(String s) {
+        }
+
+        @Override
+        public void onProviderDisabled(String s) {
+        }
+    };
 
 }
